@@ -8,7 +8,7 @@ import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 
 
-import logo from './img/sphere_closed_96.png';
+import logo from '../../assets/img/sphere_closed_96.png';
 import './login.less';
 
 import { reqLogin } from '../../api';
