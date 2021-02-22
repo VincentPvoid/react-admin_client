@@ -10,7 +10,7 @@ import {
 import { PlusOutlined } from '@ant-design/icons';
 
 import LinkButton from '../../components/link-button'
-import { reqSearchProducts } from '../../api';
+import { reqSearchProducts, reqUpdateProStatus } from '../../api';
 import { PAGE_SIZE } from '../../utils/constants';
 
 const { Option } = Select;
@@ -45,11 +45,11 @@ export default class ProductHome extends Component {
       {
         title: '状态',
         width: 100,
-        render: (proItem) => { // 返回需要显示的界面标签
+        render: (proItem) => { // status 1表示在售，2表示已下架
           return (
             <span>
-              <Button type="primary" onClick={() => { }}>下架</Button>
-              <span>在售</span>
+              <Button type="primary" onClick={() => { this.updateProStatus(proItem) }}>{proItem.status === 1 ? '下架' : '上架'}</Button>
+              <span>{proItem.status === 1 ? '在售' : '已下架'}</span>
             </span>
           )
         },
@@ -60,8 +60,8 @@ export default class ProductHome extends Component {
         render: (proItem) => { // 返回需要显示的界面标签
           return (
             <span>
-              <LinkButton onClick={() => {this.props.history.push('/product/detail', proItem)}}>详情</LinkButton>
-              <LinkButton onClick={() => {this.props.history.push('/product/addupdate', proItem)}}>修改</LinkButton>
+              <LinkButton onClick={() => { this.props.history.push('/product/detail', proItem) }}>详情</LinkButton>
+              <LinkButton onClick={() => { this.props.history.push('/product/addupdate', proItem) }}>修改</LinkButton>
             </span>
           )
         },
@@ -75,19 +75,19 @@ export default class ProductHome extends Component {
       loading: true
     })
     this.pageNum = pageNum;
-    let {searchType, searchWord} = this.state;
+    let { searchType, searchWord } = this.state;
     let res = {};
     let param = {
       pageNum,
-      pageSize:PAGE_SIZE,
+      pageSize: PAGE_SIZE,
     }
 
-    if (searchWord) {    
-      let type = searchType === '0'?'productName':'productDesc';
+    if (searchWord) {
+      let type = searchType === '0' ? 'productName' : 'productDesc';
       param[type] = searchWord;
 
       res = await reqSearchProducts(param)
-    } else {    
+    } else {
       res = await reqSearchProducts(param);
     }
 
@@ -99,6 +99,21 @@ export default class ProductHome extends Component {
         products: res.data.list,
         total: res.data.total
       })
+    }
+  }
+
+  // 更新指定商品的状态
+  updateProStatus = async (proItem) => {
+    let productId = proItem._id;
+    let { status } = proItem;
+    status = status === 1 ? 2 : 1;
+    const res = await reqUpdateProStatus(productId, status)
+    // console.log(res,'-------------')
+    if (res.status === 0) {
+      message.success('更新商品状态成功！')
+      this.getProducts(this.pageNum)
+    } else {
+      message.error(res.msg)
     }
   }
 
@@ -126,12 +141,12 @@ export default class ProductHome extends Component {
           placeholder='关键字'
           onChange={(e) => this.setState({ searchWord: e.target.value })}
         />
-        <Button type="primary" onClick={()=>{this.getProducts(1)}}>搜索</Button>
+        <Button type="primary" onClick={() => { this.getProducts(1) }}>搜索</Button>
       </span>
     )
     // Card的右侧
     const extra = (
-      <Button type="primary">
+      <Button type="primary" onClick={() => { this.props.history.push('/product/addupdate') }}>
         <PlusOutlined />
         <span>添加商品</span>
       </Button>

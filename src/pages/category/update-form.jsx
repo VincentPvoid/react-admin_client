@@ -1,8 +1,8 @@
 /* 更新分类的form组件 */
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Form, Input } from 'antd';
 
-export default class UpdateForm extends Component {
+export default class UpdateForm extends PureComponent {
   constructor(props){
     super(props)
     this.item = this.props.item;

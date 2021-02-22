@@ -37,7 +37,7 @@ class LeftNav extends Component {
         // 查找一个与当前子路径匹配的子Item
         const cItem = item.children.find(cItem => cItem.key === path)
         // 如果存在，说明当前item的子列表需要打开
-        if(cItem){
+        if (cItem) {
           this.openKey = item.key;
         }
         return (
@@ -54,7 +54,7 @@ class LeftNav extends Component {
   使用reduce()+递归调用
   */
   getMenuNodes_reduce = (menuList) => {
-    console.log('bbbbbbbb')
+    // console.log('bbbbbbbb')
 
     // 获取当前请求的path
     let path = this.props.location.pathname;
@@ -69,10 +69,11 @@ class LeftNav extends Component {
           </Menu.Item>
         )
       } else {
-        // 查找一个与当前子路径匹配的子Item
-        const cItem = item.children.find(cItem => cItem.key === path)
+        // 查找一个与当前子路径匹配的子Item；
+        // 注意如果当前为/product下的路由，key不能完全匹配，因此只需要判断当前path是否包含有Item的key
+        const cItem = item.children.find(cItem => path.indexOf(cItem.key) === 0)
         // 如果存在，说明当前item的子列表需要打开
-        if(cItem){
+        if (cItem) {
           this.openKey = item.key;
         }
 
@@ -86,7 +87,7 @@ class LeftNav extends Component {
     }, [])
   }
 
-  constructor(props){
+  constructor(props) {
     super(props)
     this.menuNodes = this.getMenuNodes_reduce(menuList)
   }
@@ -94,9 +95,12 @@ class LeftNav extends Component {
 
   render() {
 
-    const path = this.props.location.pathname;
+    let path = this.props.location.pathname;
     const openKey = this.openKey;
-    
+
+    // 如果当前的路径是product的子路径，则把path的值设为/product，否则无法显示选中效果（因为没有路由项的key与path完全一致）
+    path = path.indexOf('/product') === 0 ? '/product' : path;
+
     return (
       <div className="left-nav">
         <Link to='/home' className="left-nav-header">

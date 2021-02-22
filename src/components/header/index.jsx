@@ -82,10 +82,10 @@ class Header extends Component {
     const path = this.props.location.pathname;
     let title = '';
     menuList.forEach(item => {
-      if(item.key === path){ // 如果当前item对象的key等于当前path，item的title就是当前要显示的title
+      if(path===item.key){ // 如果当前item对象的key等于当前path，item的title就是当前要显示的title
         title = item.title;
       }else if(item.children){
-        const cItem = item.children.find(cItem => cItem.key === path)
+        const cItem = item.children.find(cItem => path.indexOf(cItem.key)===0)
         if(cItem) title = cItem.title;
       }
     })

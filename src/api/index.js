@@ -23,12 +23,12 @@ export const reqCategory = (parentId) => {
 
 // 更新（修改）商品分类
 export const reqUpdateCategory = (categoryId, categoryName) => {
-  return ajax('/manage/category/update',{categoryId, categoryName}, 'POST')
+  return ajax('/manage/category/update', { categoryId, categoryName }, 'POST')
 }
 
 // 添加商品分类
 export const reqAddCategory = (parentId, categoryName) => {
-  return ajax('/manage/category/add', {parentId, categoryName}, 'POST')
+  return ajax('/manage/category/add', { parentId, categoryName }, 'POST')
 }
 
 // 获取商品分页列表
@@ -45,4 +45,40 @@ productName或productDesc 商品名称/商品描述关键字 可选 二个只能
 */
 export const reqSearchProducts = (data) => {
   return ajax('/manage/product/search', data)
+}
+
+
+// 根据分类ID获取分类
+export const reqCategoryName = (categoryId) => {
+  return ajax('/manage/category/info', { categoryId })
+}
+
+// 对商品进行上架/下架处理
+export const reqUpdateProStatus = (productId, status) => {
+  return ajax('/manage/product/updateStatus', { productId, status }, 'POST')
+}
+
+// 删除图片
+export const reqDeleteImg = (name) => {
+  return ajax('/manage/img/delete', { name }, 'POST')
+}
+
+// 更新或添加商品
+export const reqAddUpdateProduct = (product) => {
+  return ajax('/manage/product/' + (product._id ? 'update' : 'add'), product, 'POST')
+}
+
+// 获取角色列表
+export const reqRoles = () => {
+  return ajax('/manage/role/list');
+}
+
+// 添加角色
+export const reqAddRole = (roleName) => {
+  return ajax('/manage/role/add', { roleName }, 'POST')
+}
+
+// 获取所有用户列表
+export const reqUsers = () =>{
+  return ajax('/manage/user/list')
 }
