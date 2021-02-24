@@ -7,10 +7,13 @@ import {
   message
 } from 'antd';
 
+import memoryUtils from '../../utils/memoryUtils';
+import storageUtils from '../../utils/storageUtils';
 import { formatDate } from '../../utils/dateFormat';
-import { reqRoles, reqAddRole } from '../../api';
+import { reqRoles, reqAddRole, reqUpdateRole } from '../../api';
 import AddForm from './add-form';
 import AuthForm from './auth-form';
+
 
 export default class Role extends Component {
 
@@ -57,6 +60,15 @@ export default class Role extends Component {
     };
   }
 
+  // 直接点击checkbox时，把当前选择role加入state中
+  // clickCheckbox = (value) => {
+  //   // console.log(e,'bbbbbbbbbbbb')
+  //   const role = this.state.roles.find(item => item._id === value[0])
+  //   this.setState({
+  //     role,
+  //   })
+  // }
+
   // 获取角色列表
   getRoles = async () => {
     const res = await reqRoles();
@@ -73,6 +85,7 @@ export default class Role extends Component {
     })
     this.addForm.current && this.addForm.current.resetFields()
   }
+
   // 确定添加角色
   addRole = () => {
     this.addForm.current.validateFields().then(
@@ -99,8 +112,6 @@ export default class Role extends Component {
           }))
 
           this.addForm.current.resetFields()
-
-
         } else {
           message.error('添加角色失败')
         }
@@ -109,10 +120,39 @@ export default class Role extends Component {
     // console.log(this.addForm.current)
   }
 
+  // 修改角色权限
+  updateRole = async () => {
+    // let b = this.authForm.current.getcheckedKeys()
+    const role = this.state.role
+    role.auth_time = Date.now();
+    role.auth_name = memoryUtils.user.username;
+    role.menus = this.authForm.current.getcheckedKeys()
+    // console.log(role,'rrrrrrrrrrrr')
+    const res = await reqUpdateRole(role);
+    if (res.status === 0) {
+      // 如果更新的是当前用户所属角色的权限，强制退出
+      if (role._id === memoryUtils.user.role_id) {
+        memoryUtils.user = {};
+        storageUtils.removeUser();
+        this.props.history.replace('/login');
+        message.success('当前用户权限已改变，请重新登录')
+      } else {
+        message.success('修改角色权限成功')
+        this.setState({
+          showModel: 0,
+          roles: [...this.state.roles]
+        })
+      }
+    } else {
+      message.error('修改角色权限失败')
+    }
+  }
+
   constructor(props) {
     super(props)
     this.initColmuns();
-    this.addForm = React.createRef();
+    this.addForm = React.createRef(); // 添加角色Form的容器
+    this.authForm = React.createRef(); // 设置权限的容器
   }
 
   componentDidMount() {
@@ -127,7 +167,7 @@ export default class Role extends Component {
     const title = (
       <span>
         <Button type="primary" onClick={() => { this.setState({ showModel: 1 }) }}>创建角色</Button> &nbsp;&nbsp;&nbsp;
-        <Button type="primary" disabled={!role._id} onClick={()=>{this.setState({showModel:2})}}>设置角色权限</Button>
+        <Button type="primary" disabled={!role._id} onClick={() => { this.setState({ showModel: 2 }) }}>设置角色权限</Button>
       </span>
     )
 
@@ -141,7 +181,7 @@ export default class Role extends Component {
             rowKey='_id'
             loading={loading}
             pagination={{ showQuickJumper: true }}
-            rowSelection={{ type: 'radio', columnWidth: 50, selectedRowKeys: [role._id] }}
+            rowSelection={{ type: 'radio', columnWidth: 50, selectedRowKeys: [role._id], onSelect:(role) => this.setState({role}) }}
             onRow={this.onRow}
           />
         </Card>
@@ -160,12 +200,16 @@ export default class Role extends Component {
 
         <Modal title="设置角色权限"
           visible={showModel === 2}
-          onOk={this.addRole}
+          onOk={this.updateRole}
           onCancel={this.closeModal}
           okText='确定'
           cancelText='取消'
         >
-          <AuthForm role={role} />
+          <AuthForm
+            ref={this.authForm}
+            role={role}
+            key={role._id}
+          />
         </Modal>
 
 

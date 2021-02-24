@@ -162,6 +162,7 @@ export default class ProductHome extends Component {
             rowKey='_id'
             loading={loading}
             pagination={{
+              current:this.pageNum,
               total,
               showQuickJumper: true,
               defaultPageSize: PAGE_SIZE,

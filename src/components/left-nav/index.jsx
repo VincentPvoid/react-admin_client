@@ -3,6 +3,7 @@ import { Link, withRouter } from 'react-router-dom';
 import { Menu } from 'antd';
 
 import menuList from '../../config/menuConfig';
+import memoryUtils from '../../utils/memoryUtils';
 import logo from '../../assets/img/sphere_closed_96.png';
 import './index.less';
 
@@ -17,6 +18,26 @@ const { SubMenu } = Menu;
 class LeftNav extends Component {
 
   /*
+  判断当前用户是否有当前item对应的菜单权限
+  */
+  hasAuth = (item) => {
+    /*
+    1. 如果菜单项标识为公开
+    2. 如果当前用户是admin
+    3. 如果菜单项的key在用户的menus中
+    */
+    if (item.isPublic || memoryUtils.user.username === 'admin' || memoryUtils.user.role.menus.indexOf(item.key) != -1) {
+      return true
+    } else if (item.children) {
+      // 4. 如果有子节点，需要判断有没有一个child的key在menus中
+      return !!item.children.find(child => memoryUtils.user.role.menus.indexOf(child.key) != -1)
+    }
+    return false;
+  }
+
+
+
+  /*
   根据menu的数据数组生成对应的标签数组
   使用map()+递归调用
   */
@@ -25,26 +46,28 @@ class LeftNav extends Component {
     let path = this.props.location.pathname;
 
     return menuList.map(item => {
-      if (!item.children) {
-        return (
-          <Menu.Item key={item.key} icon={item.icon}>
-            <Link to={item.key}>
-              {item.title}
-            </Link>
-          </Menu.Item>
-        )
-      } else {
-        // 查找一个与当前子路径匹配的子Item
-        const cItem = item.children.find(cItem => cItem.key === path)
-        // 如果存在，说明当前item的子列表需要打开
-        if (cItem) {
-          this.openKey = item.key;
+      if (this.hasAuth(item)) {
+        if (!item.children) {
+          return (
+            <Menu.Item key={item.key} icon={item.icon}>
+              <Link to={item.key}>
+                {item.title}
+              </Link>
+            </Menu.Item>
+          )
+        } else {
+          // 查找一个与当前子路径匹配的子Item
+          const cItem = item.children.find(cItem => cItem.key === path)
+          // 如果存在，说明当前item的子列表需要打开
+          if (cItem) {
+            this.openKey = item.key;
+          }
+          return (
+            <SubMenu key={item.key} icon={item.icon} title={item.title}>
+              {this.getMenuNodes(item.children)}
+            </SubMenu>
+          )
         }
-        return (
-          <SubMenu key={item.key} icon={item.icon} title={item.title}>
-            {this.getMenuNodes(item.children)}
-          </SubMenu>
-        )
       }
     })
   }
@@ -60,28 +83,30 @@ class LeftNav extends Component {
     let path = this.props.location.pathname;
 
     return menuList.reduce((pre, item) => {
-      if (!item.children) {
-        pre.push(
-          <Menu.Item key={item.key} icon={item.icon}>
-            <Link to={item.key}>
-              {item.title}
-            </Link>
-          </Menu.Item>
-        )
-      } else {
-        // 查找一个与当前子路径匹配的子Item；
-        // 注意如果当前为/product下的路由，key不能完全匹配，因此只需要判断当前path是否包含有Item的key
-        const cItem = item.children.find(cItem => path.indexOf(cItem.key) === 0)
-        // 如果存在，说明当前item的子列表需要打开
-        if (cItem) {
-          this.openKey = item.key;
-        }
+      if (this.hasAuth(item)) {
+        if (!item.children) {
+          pre.push(
+            <Menu.Item key={item.key} icon={item.icon}>
+              <Link to={item.key}>
+                {item.title}
+              </Link>
+            </Menu.Item>
+          )
+        } else {
+          // 查找一个与当前子路径匹配的子Item；
+          // 注意如果当前为/product下的路由，key不能完全匹配，因此只需要判断当前path是否包含有Item的key
+          const cItem = item.children.find(cItem => path.indexOf(cItem.key) === 0)
+          // 如果存在，说明当前item的子列表需要打开
+          if (cItem) {
+            this.openKey = item.key;
+          }
 
-        pre.push(
-          <SubMenu key={item.key} icon={item.icon} title={item.title}>
-            {this.getMenuNodes_reduce(item.children)}
-          </SubMenu>
-        )
+          pre.push(
+            <SubMenu key={item.key} icon={item.icon} title={item.title}>
+              {this.getMenuNodes_reduce(item.children)}
+            </SubMenu>
+          )
+        }
       }
       return pre;
     }, [])

@@ -11,16 +11,14 @@ import menuList from '../../config/menuConfig';
 
 export default class AuthForm extends PureComponent {
 
+
+  // 点击tree中checkbox时调用
   onCheck = (checkedKeys, info) => {
     // console.log('onCheck', checkedKeys, info);
-    console.log(checkedKeys, 'sdfsfgggggggg')
-    console.log(info, 'info')
-    // const checkedItems = info.checkedNodes.map(item => item.key)
-    // this.setState({
-    //   checkedKeys:checkedItems
-    // })
+    // console.log(checkedKeys, 'sdfsfgggggggg')
+    // console.log(info, 'info')
     this.setState({
-      checkedKeys
+      checkedKeys,
     })
   };
 
@@ -28,9 +26,19 @@ export default class AuthForm extends PureComponent {
   initTree = () => {
     return ([{
       title: '平台权限',
-      key: '/all',
+      key: 'all',
       children: [...menuList]
     }])
+  }
+
+  cleanCheckedKeys = () => {
+    this.setState({
+      checkedKeys: []
+    })
+  }
+
+  getcheckedKeys = () => {
+    return this.state.checkedKeys;
   }
 
   constructor(props) {
@@ -41,25 +49,44 @@ export default class AuthForm extends PureComponent {
     }
   }
 
+
+
   // 当props或state发生变化时，在重新rendor()之前调用；第一次加载组件时不会调用
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   // console.log(nextProps.role.menus, 'nextProps')
-  //   // console.log(nextState, 'nextState')
+  // getSnapshotBeforeUpdate(prevProps, prevState) {
+  //   console.log(prevProps.role.menus, 'prevProps')
+  //   // console.log(prevState, 'prevState')
   //   // 判断当前状态是否已经更新完成（必须，否则会死循环）
-  //   if (this.state.checkedKeys != nextProps.role.menus) {
+  //   if (this.state.checkedKeys != prevProps.role.menus) {
+  //     return this.state.checkedKeys
+  //   }
+  //   return null
+  //   // setTimeout(() => {
+  //   //   console.log(prevProps.role.menus, 'prevProps')
+  //   // }, 100);
+  // }
+
+  // componentDidUpdate(prevProps, prevState, snapshot) {
+  //   if(this.props.role._id!=prevProps.role._id){
   //     this.setState({
-  //       checkedKeys: nextProps.role.menus
+  //       checkedKeys:this.props.role.menus
   //     })
   //   }
-  //   return true;
+  //   // console.log(prevProps, 'pp')
   // }
+
+  // componentWillUnmount(){
+  //   this.cleanCheckedKeys()
+  // }
+
 
   render() {
     console.log('auth-form render()')
-    
+
     const treeData = this.initTree()
     const { role } = this.props;
-    const { checkedKeys } = this.state
+    // const checkedKeys = this.state.change ? this.state.checkedKeys : role.menus
+    // console.log(checkedKeys,'checkedkeys')
+    const { checkedKeys } = this.state;
 
     const layout = {
       labelCol: { span: 4 }, // 左侧label的宽度
