@@ -29,42 +29,28 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+# 问题和记录
+## bug  
+- 无法改变主题颜色
+- Form组件中无法使用resetFields清空表单数据  
+- 修改商品时 在没有获取到商品分类之前分类区域显示的是category值  
+- 数据库数据有问题 用户列表有些数据中缺少role_id值  
+- 在render中重置表单时会有报错（但功能能实现，不受影响）Cannot update during an existing state transition (such as within `render`). Render methods should be a pure function of props and state.  
+- 选择相同用户role时，如果在authForm中进行了修改但不保存，不改变role时再次打开authForm，状态会进行保留 
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 已解决
+- 设置权限时 checkbox选择有bug：  
+ 使用了shouldComponentUpdate，设置不正确导致tree的状态更新出现问题
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- 无法更新authForm中checkedKeys的状态；或是并没有改变role的值就重复更新：  
+ 使用PureComponent，组件role不变时不进行更新（不会进行render）；这样就可以在每次render时获取最新的checkedKeys值
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- 添加/更新用户信息弹框，第一次打开时无法更新数据，第二次再开才会更新数据：  
+ antd4.x版本之前的bug
+ 官方文档原话：在 v3 版本中，修改未操作的字段 initialValue 会同步更新字段值，这是一个 BUG。但是由于被长期作为一个 feature 使用，因而我们一直没有修复。在 v4 中，该 BUG 已被修复。initialValue 只有在初始化以及重置表单时生效。
+ https://ant.design/components/form/v3-cn/
+ 因此应该使用setFieldsValue来设定新的值，或重置表单
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- 点击选择role时如果点击的是checkbox本身，则无法进行选中：  
+ 为checkbox加入点击监听事件
