@@ -6,29 +6,30 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { connect } from 'react-redux';
 
 
 import logo from '../../assets/img/sphere_closed_96.png';
 import './login.less';
 
-import { reqLogin } from '../../api';
-import memoryUtils from '../../utils/memoryUtils';
-import storageUtils from '../../utils/storageUtils';
+import { login } from '../../redux/actions';
 
 
 
 // const [form] = Form.useForm();
 
-export default class Login extends Component {
+class Login extends Component {
 
 
   render() {
 
     // 如果用户已经登录，直接跳转到管理页面
-    const user = memoryUtils.user;
+    const user = this.props.user;
     if (user && user._id) {
-      return <Redirect to="/" />
+      return <Redirect to="/home" />
     }
+
+    const errorMsg = this.props.user.errorMsg;
 
     // ajax请求使用promise
     // const onFinish = (values) => {
@@ -43,21 +44,8 @@ export default class Login extends Component {
     const onFinish = async (values) => {
       // console.log('Success:', values);
       const { username, password } = values;
-      const result = await reqLogin(username, password)
-      // console.log('请求成功', result)
-      if (result.status === 0) {
-        // 提示登录成功
-        message.success('登录成功');
-        // 保存用户登录信息user
-        const user = result.data;
-        storageUtils.saveUser(user); // 保存到localStorage中
-        memoryUtils.user = user; // 保存到内存中
-        // 跳转到管理界面（不需要再退回到登录页面）
-        this.props.history.replace('/');
-      } else { // 登录失败
-        // 提示错误信息
-        message.error(result.msg)
-      }
+      // 调用分发异步action的函数，发送登录的异步请求，返回结果后更新状态
+      this.props.login(username, password)
     };
 
 
@@ -130,12 +118,21 @@ export default class Login extends Component {
                 登录
               </Button>
             </Form.Item>
+            <div>{errorMsg}</div>
           </Form>
         </section>
       </div>
     )
   }
 }
+
+
+export default connect(
+  state => ({
+    user: state.user
+  }),
+  { login }
+)(Login)
 
 
 /*
