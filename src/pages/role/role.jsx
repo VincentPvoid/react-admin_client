@@ -6,16 +6,16 @@ import {
   Modal,
   message
 } from 'antd';
+import { connect } from 'react-redux';
 
-import memoryUtils from '../../utils/memoryUtils';
-import storageUtils from '../../utils/storageUtils';
+import { logout } from '../../redux/actions';
 import { formatDate } from '../../utils/dateFormat';
 import { reqRoles, reqAddRole, reqUpdateRole } from '../../api';
 import AddForm from './add-form';
 import AuthForm from './auth-form';
 
 
-export default class Role extends Component {
+class Role extends Component {
 
   state = {
     loading: false,
@@ -125,16 +125,14 @@ export default class Role extends Component {
     // let b = this.authForm.current.getcheckedKeys()
     const role = this.state.role
     role.auth_time = Date.now();
-    role.auth_name = memoryUtils.user.username;
+    role.auth_name = this.props.user.username;
     role.menus = this.authForm.current.getcheckedKeys()
     // console.log(role,'rrrrrrrrrrrr')
     const res = await reqUpdateRole(role);
     if (res.status === 0) {
       // 如果更新的是当前用户所属角色的权限，强制退出
-      if (role._id === memoryUtils.user.role_id) {
-        memoryUtils.user = {};
-        storageUtils.removeUser();
-        this.props.history.replace('/login');
+      if (role._id === this.props.user.role_id) {
+        this.props.logout()
         message.success('当前用户权限已改变，请重新登录')
       } else {
         message.success('修改角色权限成功')
@@ -181,7 +179,7 @@ export default class Role extends Component {
             rowKey='_id'
             loading={loading}
             pagination={{ showQuickJumper: true }}
-            rowSelection={{ type: 'radio', columnWidth: 50, selectedRowKeys: [role._id], onSelect:(role) => this.setState({role}) }}
+            rowSelection={{ type: 'radio', columnWidth: 50, selectedRowKeys: [role._id], onSelect: (role) => this.setState({ role }) }}
             onRow={this.onRow}
           />
         </Card>
@@ -218,3 +216,8 @@ export default class Role extends Component {
     )
   }
 }
+
+export default connect(
+  state => ({ user: state.user }),
+  { logout }
+)(Role)

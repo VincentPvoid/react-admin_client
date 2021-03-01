@@ -1,16 +1,13 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Modal, message } from 'antd';
+import { connect } from 'react-redux';
 
 import './index.less';
-
 import { reqWeather } from '../../api';
-import menuList from '../../config/menuConfig';
-import memoryUtils from '../../utils/memoryUtils';
-import storageUtils from '../../utils/storageUtils';
 import { formatDate } from '../../utils/dateFormat';
 import LinkButton from '../../components/link-button';
-
+import { logout } from '../../redux/actions'
 
 const { confirm } = Modal;
 
@@ -31,10 +28,7 @@ class Header extends Component {
       cancelText: '取消',
       onOk: () => {
         // 移除保存的user
-        storageUtils.removeUser();
-        memoryUtils.user = {};
-        // 跳转到login页面
-        this.props.history.replace('/login');
+        this.props.logout()
       },
     });
   }
@@ -78,19 +72,19 @@ class Header extends Component {
     }, 1000)
   }
 
-  getTitle = () => {
-    const path = this.props.location.pathname;
-    let title = '';
-    menuList.forEach(item => {
-      if(path===item.key){ // 如果当前item对象的key等于当前path，item的title就是当前要显示的title
-        title = item.title;
-      }else if(item.children){
-        const cItem = item.children.find(cItem => path.indexOf(cItem.key)===0)
-        if(cItem) title = cItem.title;
-      }
-    })
-    return title;
-  }
+  // getTitle = () => {
+  //   const path = this.props.location.pathname;
+  //   let title = '';
+  //   menuList.forEach(item => {
+  //     if(path===item.key){ // 如果当前item对象的key等于当前path，item的title就是当前要显示的title
+  //       title = item.title;
+  //     }else if(item.children){
+  //       const cItem = item.children.find(cItem => path.indexOf(cItem.key)===0)
+  //       if(cItem) title = cItem.title;
+  //     }
+  //   })
+  //   return title;
+  // }
 
 
   componentDidMount() {
@@ -108,10 +102,10 @@ class Header extends Component {
     const { weather, city, sysTime } = this.state;
 
     // 得到当前用户user
-    const { username } = memoryUtils.user;
+    const { username } = this.props.user;
 
     // 得到当前title
-    const title = this.getTitle();
+    const title = this.props.headTitle;
 
     return (
       <div className="header">
@@ -132,4 +126,10 @@ class Header extends Component {
   }
 }
 
-export default withRouter(Header);
+export default connect(
+  state => ({
+    headTitle: state.headTitle,
+    user: state.user
+  }),
+  { logout }
+)(withRouter(Header))

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { Menu } from 'antd';
+import { connect } from 'react-redux';
 
+import { setHeadTitle } from '../../redux/actions'
 import menuList from '../../config/menuConfig';
-import memoryUtils from '../../utils/memoryUtils';
 import logo from '../../assets/img/sphere_closed_96.png';
 import './index.less';
 
@@ -26,11 +27,11 @@ class LeftNav extends Component {
     2. 如果当前用户是admin
     3. 如果菜单项的key在用户的menus中
     */
-    if (item.isPublic || memoryUtils.user.username === 'admin' || memoryUtils.user.role.menus.indexOf(item.key) != -1) {
+    if (item.isPublic || this.props.user.username === 'admin' || this.props.user.role.menus.indexOf(item.key) != -1) {
       return true
     } else if (item.children) {
       // 4. 如果有子节点，需要判断有没有一个child的key在menus中
-      return !!item.children.find(child => memoryUtils.user.role.menus.indexOf(child.key) != -1)
+      return !!item.children.find(child => this.props.user.role.menus.indexOf(child.key) != -1)
     }
     return false;
   }
@@ -82,12 +83,21 @@ class LeftNav extends Component {
     // 获取当前请求的path
     let path = this.props.location.pathname;
 
+    // 如果当前请求的是根路径，设置头部标题为首页
+    if (path === '/') {
+      this.props.setHeadTitle('首页')
+    }
+
     return menuList.reduce((pre, item) => {
       if (this.hasAuth(item)) {
+        // 如果请求路径与当前item.key匹配，则将item.title保存到store
+        if (path.indexOf(item.key) === 0) {
+          this.props.setHeadTitle(item.title)
+        }
         if (!item.children) {
           pre.push(
             <Menu.Item key={item.key} icon={item.icon}>
-              <Link to={item.key}>
+              <Link to={item.key} onClick={()=>this.props.setHeadTitle(item.title)}>
                 {item.title}
               </Link>
             </Menu.Item>
@@ -151,4 +161,7 @@ withRouter高阶组件
 包装非路由组件，返回一个新的组件
 新的组件向非路由组件传递3个属性：history location match
 */
-export default withRouter(LeftNav);
+export default connect(
+  state => ({ user: state.user }),
+  { setHeadTitle }
+)(withRouter(LeftNav));
