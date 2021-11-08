@@ -32,7 +32,6 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 # 问题和记录
 ## bug  
-- 无法改变主题颜色
 - Form组件中无法使用resetFields清空表单数据  
 - 修改商品时 在没有获取到商品分类之前分类区域显示的是category值  
 - 数据库数据有问题 用户列表有些数据中缺少role_id值  
@@ -54,3 +53,6 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 - 点击选择role时如果点击的是checkbox本身，则无法进行选中：  
  为checkbox加入点击监听事件
+ 
+ - 无法改变主题颜色  
+  config-overrides.js中的modifyVars属性写错了导致修改没有生效
