@@ -8,7 +8,7 @@
    异步返回结果数据，而不是包含结果数据的response
 1. 优化：统一处理请求异常
   在外层包一个自己创建的promise对象
-  在请求出错时，不reject(erro)，而是显示错误提示
+  在请求出错时，不reject(error)，而是显示错误提示
 2. 优化：异步得到不是response，而是response.data
   在请求成功resolve时，resolve(response.data)
 */
@@ -21,10 +21,13 @@ export default function ajax(url, data = {}, type = 'GET') {
     let promise = null;
     // 1. 执行异步ajax请求
     if (type === 'GET') {
-      promise = axios.get(url, {params: data}) // 指定请求参数
+      promise = axios.get(url, { // 配置对象
+        params: data // 指定请求参数
+      }) 
     } else {
       promise = axios.post(url, data)
     }
+
     // 2. 如果成功，调用resolve
     promise.then(res => {
       resolve(res.data)
